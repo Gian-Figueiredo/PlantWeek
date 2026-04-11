@@ -171,11 +171,11 @@ class Calendario:
     def get_tarefa(self, index : int):
         return self.lista[index]
 
-    def remover_tarefa(self, tarefa : Tarefa):
-        self.lista.remove(tarefa)
+    def remover_tarefa(self, index : int):
+        self.lista.pop(index)
 
-    def alterar_tarefa(self, antiga_tarefa : Tarefa, nova_tarefa : Tarefa):
-        self.remover_tarefa(antiga_tarefa)
+    def alterar_tarefa(self, index : int, nova_tarefa : Tarefa):
+        self.remover_tarefa(index)
         self.add_tarefa(nova_tarefa)
 
     def __repr__(self):
