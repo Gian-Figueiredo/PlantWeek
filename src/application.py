@@ -18,7 +18,7 @@ class FacadeCalendario:
     def remover_tarefa(self, index : int):
         if not isinstance(index, int):
             raise TypeError(f"O parâmetro index precisa ser do tipo int, mas foi passado {type(index)}")
-        self.calendario.remove_tarefa(index)
+        self.calendario.remover_tarefa(index)
     
     def listar_tarefas(self):
         return self.calendario.lista

@@ -1,12 +1,16 @@
 from .application import App
 from time import sleep
+from threading import Thread
 import subprocess
+from .storage import Storage
 from colorama import init, Fore, Style
 init(autoreset=True)
 
 class Tui:
     def __init__(self, controller = App()):
         self.controller = controller.facade
+        self.storage = Storage()
+
 
     def exibir_menu(self):
         subprocess.run('clear', shell=True)
@@ -16,27 +20,42 @@ class Tui:
         print(Fore.GREEN + Style.BRIGHT + "2. Listar tarefas")
         print(Fore.GREEN + Style.BRIGHT + "3. Remover tarefa")
         print(Fore.GREEN + Style.BRIGHT + "4. Alterar tarefa")
-        print(Fore.GREEN + Style.BRIGHT + "5. Sair")
+        print(Fore.GREEN + Style.BRIGHT + "5. Limpar lista de tarefas")
+        print(Fore.GREEN + Style.BRIGHT + "6. Salvar tarefas")
+        print(Fore.GREEN + Style.BRIGHT + "0. Sair")
 
     def executar(self):
         while True:
             self.exibir_menu()
             sleep(0.5)
             escolha = input("Escolha uma opção: ")
-            if escolha == '1':
-                self.adicionar_tarefa()
-            elif escolha == '2':
-                self.listar_tarefas()
-            elif escolha == '3':
-                self.remover_tarefa()
-            elif escolha == '4':
-                self.alterar_tarefa()
-            elif escolha == '5':
-                print(Fore.GREEN + Style.BRIGHT + "Saindo do programa...")
-                sleep(2)
-                break
-            else:
-                print("Opção inválida. Tente novamente.")
+            match escolha:
+                case '1':
+                    self.adicionar_tarefa()
+                case '2':
+                    self.listar_tarefas()
+                case '3':
+                    self.remover_tarefa()
+                case '4':
+                    self.alterar_tarefa()
+                case '5':
+                    self.limpar_lista()
+                case '6':
+                    self.salvar_tarefas()
+                case '0':
+                    print(Fore.GREEN + Style.BRIGHT + "Saindo do programa...")
+                    t = Thread(target=self.salvar_tarefas)
+                    t.start()
+                    t.join()
+                    break
+                case _:
+                    print("Opção inválida. Tente novamente.")
+
+    def limpar_lista(self):
+        self.controller.calendario.lista.clear()
+        print(Fore.GREEN + Style.BRIGHT + "Lista de tarefas limpa com sucesso.")
+        sleep(0.5)
+        input("Pressione Enter para continuar...")
 
     def adicionar_tarefa(self):
         corretamente = False
@@ -70,7 +89,13 @@ class Tui:
             for id, tarefa in enumerate(tarefas):
                 print(f"ID: {id} | Nome: {tarefa.nome} | Descrição: {tarefa.descricao} | Prazo: {tarefa.prazo}")
                 sleep(0.3)
-            input("Pressione Enter para continuar...")
+        input("Pressione Enter para continuar...")
+
+    def salvar_tarefas(self):
+        self.storage.salvar_tarefas(self.controller.listar_tarefas())
+        sleep(0.5)
+        print(Fore.GREEN + Style.BRIGHT + "Tarefas salvas com sucesso.")
+        sleep(0.5)
 
     def remover_tarefa(self):
         corretamente = False
@@ -83,7 +108,7 @@ class Tui:
             except IndexError as e:
                 print(f"Erro ao remover tarefa: {e}")
             else:
-                Fore.GREEN + Style.BRIGHT + print("Tarefa removida com sucesso.")
+                print(Fore.GREEN + Style.BRIGHT + "Tarefa removida com sucesso.")
                 corretamente = True
             finally:
                 input("Pressione Enter para continuar...")
@@ -114,7 +139,7 @@ class Tui:
             except ValueError as e:
                 print(f"Erro ao alterar tarefa: {e}")
             else:
-                Fore.GREEN + Style.BRIGHT + print("Tarefa alterada com sucesso.")
+                print(Fore.GREEN + Style.BRIGHT + "Tarefa alterada com sucesso.")
                 corretamento = True
             finally:
                 input("Pressione Enter para continuar...")   
